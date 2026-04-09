@@ -1,36 +1,192 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 CodeDaily
 
-## Getting Started
+O **CodeDaily** é uma plataforma de desafios diários de programação, onde usuários podem resolver problemas diretamente no navegador, submeter código e receber feedback automático em tempo real.
 
-First, run the development server:
+O sistema é composto por uma aplicação web fullstack em Next.js e um runner isolado responsável pela execução segura do código.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 🧠 Visão geral
+
+O fluxo da aplicação funciona da seguinte forma:
+
+1. O usuário acessa um desafio
+2. Escreve sua solução no editor
+3. Submete o código
+4. A aplicação envia o código para o runner
+5. O runner executa em ambiente isolado
+6. O resultado é retornado e exibido ao usuário
+
+---
+
+## 🏗️ Arquitetura
+
+```
+Next.js (App Router)
+│
+├── Frontend (React + Tailwind)
+├── API Routes (Next.js)
+│
+└── Prisma (SQLite)
+        ↓
+Runner (Rust)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+* 🌐 **App (frontend + backend)**: Next.js (App Router)
+* 🗄️ **Banco de dados**: SQLite + Prisma
+* ⚙️ **Runner**: serviço separado em Rust (`codedaily-runner`)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📦 Estrutura do projeto
 
-## Learn More
+```
+codedaily/
+├── app/                  # App Router (páginas + layout)
+├── content/              # Conteúdo dos Challenges (mdx)
+├── lib/                  # Helpers (prisma, utils, etc)
+├── prisma/               # Schema e migrations
+├── public/               # Arquivos estáticos
+├── package.json
+├── next.config.js
+└── README.md
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ⚙️ Funcionalidades
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+* 🧩 Desafios diários de programação
+* 💻 Editor de código integrado
+* 🧪 Execução com test cases
+* 🔄 Feedback automático
+* ⚡ Integração com runner externo
+* 📦 Persistência com Prisma
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🔌 Integração com Runner
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+O CodeDaily utiliza um serviço externo para execução de código.
+
+Fluxo:
+
+```
+Frontend → API (Next.js) → Runner (Rust) → Resultado → Frontend
+```
+
+A API do Next.js é responsável por:
+
+* receber o código do usuário
+* buscar test cases
+* enviar para o runner
+* retornar o resultado final
+
+---
+
+## 🧪 Banco de dados
+
+Gerenciado com Prisma + SQLite.
+
+### Comandos úteis:
+
+```
+npx prisma migrate dev
+npx prisma studio
+```
+
+---
+
+## ▶️ Rodando o projeto
+
+### 1. Clonar repositório
+
+```
+git clone https://github.com/seu-usuario/codedaily
+cd codedaily
+```
+
+---
+
+### 2. Instalar dependências
+
+```
+npm install
+```
+
+---
+
+### 3. Configurar ambiente
+
+Crie um arquivo `.env`:
+
+```
+DATABASE_URL="file:./dev.db"
+RUNNER_URL="http://runner:8080"
+```
+
+---
+
+### 4. Rodar banco de dados
+
+```
+npx prisma migrate dev
+```
+
+---
+
+### 5. Rodar aplicação
+
+```
+npm run dev
+```
+
+---
+
+## 🐳 Rodando com Docker
+
+O projeto foi pensado para rodar totalmente em containers.
+
+### Subir ambiente completo:
+
+```
+docker-compose up --build
+```
+
+Isso irá iniciar:
+
+* Next.js (frontend + API)
+* Banco SQLite
+* Runner (container separado)
+
+---
+
+## 🔐 Segurança
+
+A execução de código é feita fora da aplicação principal, garantindo isolamento:
+
+* Limite de CPU/memória
+* Timeout de execução
+
+---
+
+## 🚧 Roadmap
+
+* [ ] Sistema de usuários
+* [ ] Histórico de submissões
+* [ ] Ranking global
+* [ ] Execução assíncrona com fila
+* [ ] Suporte a múltiplas linguagens
+* [ ] Melhorias no editor (autocomplete, lint)
+
+---
+
+## 🤝 Contribuição
+
+Contribuições são bem-vindas!
+
+1. Fork o projeto
+2. Crie uma branch (`feature/minha-feature`)
+3. Commit suas mudanças
+4. Abra um Pull Request
+
