@@ -12,74 +12,12 @@ datasource db {
   provider = "sqlite"
 }
 
-
-enum ChallengeDifficulty {
-  EASY
-  MEDIUM
-  HARD
-}
-
 model Challenge {
   id              String              @id @default(cuid())
   slug            String              @unique
-  title           String
-  summary         String
-  difficulty      ChallengeDifficulty
   sourcePath      String              @unique
-  estimatedTime   Int?
-  dailyEligible   Boolean             @default(true)
+  dailyKey        String              @unique
   isPublished     Boolean             @default(false)
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
-
-  dailyChallenges DailyChallenge[]
-  tags            ChallengeTag[]
-  languages       ChallengeLanguage[]
-  testCases       ChallengeTestCase[]
-}
-
-model ChallengeTag {
-  id          String    @id @default(cuid())
-  challengeId String
-  value       String
-
-  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-
-  @@index([challengeId])
-  @@unique([challengeId, value])
-}
-
-model ChallengeLanguage {
-  id          String    @id @default(cuid())
-  challengeId String
-  value       String
-
-  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-
-  @@index([challengeId])
-  @@unique([challengeId, value])
-}
-
-model ChallengeTestCase {
-  id             String    @id @default(cuid())
-  challengeId    String
-  input          String
-  expectedOutput String
-  order          Int       @default(0)
-  isHidden       Boolean   @default(true)
-
-  challenge      Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-
-  @@index([challengeId])
-  @@index([challengeId, order])
-}
-
-model DailyChallenge {
-  id          String    @id @default(cuid())
-  date        String    @unique
-  challengeId String
-
-  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-
-  @@index([challengeId])
 }
