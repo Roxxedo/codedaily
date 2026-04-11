@@ -71,7 +71,13 @@ export default async function HomePage() {
                                             <h3 className="mb-3 wrap-break-word text-sm font-bold uppercase tracking-widest text-zinc-400">{title}</h3>
                                             <div className="wrap-break-word text-sm leading-7 text-zinc-300">{children}</div>
                                         </div>
-                                    )
+                                    ),
+                                    ul: (props) => (
+                                        <ul className="list-disc pl-6 space-y-2" {...props} />
+                                    ),
+                                    ol: (props) => (
+                                        <ol className="list-decimal pl-6 space-y-2" {...props} />
+                                    ),
                                 }}
                                 options={{
                                     mdxOptions: {
