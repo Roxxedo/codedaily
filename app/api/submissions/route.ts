@@ -1,3 +1,4 @@
+import { loadChallengeMdx } from "@/lib/mdx";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
@@ -7,22 +8,18 @@ function normalizeOutput(value: string) {
 }
 
 export async function POST(req: Request) {
-    const body = await req.json();
-
-    const { challengeSlug, language, source_code } = body;
+    const { challengeId, language, source_code, mode } = await req.json();;
 
     const challenge = await prisma.challenge.findUnique({
-        where: { slug: challengeSlug, isPublished: true }
+        where: { id: challengeId, isPublished: true }
     });
 
     if (!challenge) {
         return NextResponse.json({ error: "Challenge not found" }, { status: 404 })
     }
 
-    const testCases = await prisma.challengeTestCase.findMany({
-        where: { challengeId: challenge.id },
-        orderBy: { order: "asc" }
-    })
+    const { frontmatter } = await loadChallengeMdx(challenge.sourcePath);
+    const { testCases } = frontmatter
 
     let passedTests = 0;
 
@@ -44,7 +41,7 @@ export async function POST(req: Request) {
         const result = await runnerResponse.json();
 
         const actual = normalizeOutput(result.stdout ?? "");
-        const expected = normalizeOutput(testCase.expectedOutput);
+        const expected = normalizeOutput(testCase.output);
 
         const passed = 
             result.exit_code === 0 &&
@@ -56,6 +53,7 @@ export async function POST(req: Request) {
                 success: false,
                 passed: false,
                 failedAt: i + 1,
+                passedTests,
                 totalTests: testCases.length,
 
                 expectedOutput: expected,
