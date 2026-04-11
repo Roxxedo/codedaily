@@ -103,7 +103,7 @@ export default async function HomePage() {
 
                     <ChallengeEditorClient
                         challengeId={challenge.id}
-                        initialLanguage="javascript"
+                        initialLanguage="JavaScript"
                     />
                 </div>
             </div>

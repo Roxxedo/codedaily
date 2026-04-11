@@ -12,13 +12,15 @@ const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
     ),
 });
 
-type LanguageKey = "javascript" | "python" | "java";
+const LANGUAGES = [ "JavaScript", "Python", "Java" ] as const
+
+type LanguageKey = (typeof LANGUAGES)[number];
 type ConsoleTone = "default" | "success" | "error";
 
 const STARTER_CODES: Record<LanguageKey, string> = {
-    javascript: `console.log("Hello World")`,
-    python: `print("Hello World")`,
-    java: `class Main {
+    JavaScript: `console.log("Hello World")`,
+    Python: `print("Hello World")`,
+    Java: `class Main {
     public static void main(String[] args) {
         System.out.println("Hello World")
     }
@@ -26,14 +28,14 @@ const STARTER_CODES: Record<LanguageKey, string> = {
 };
 
 const FILE_EXTENSION: Record<LanguageKey, string> = {
-    javascript: "js",
-    python: "py",
-    java: "java",
+    JavaScript: "js",
+    Python: "py",
+    Java: "java",
 };
 
 export default function ChallengeEditorClient({
     challengeId,
-    initialLanguage = "javascript",
+    initialLanguage = "JavaScript",
 }: {
     challengeId: string;
     initialLanguage?: LanguageKey;
@@ -75,49 +77,42 @@ export default function ChallengeEditorClient({
             setConsoleStatus("Executando");
             setConsoleOutput("Executando testes...");
 
-            // =========================================================
-            // AQUI TU CHAMA TUA API DO APP ROUTER
-            // ---------------------------------------------------------
-            // Exemplo de fluxo:
-            // const response = await fetch("/api/submissions", {
-            //   method: "POST",
-            //   headers: { "Content-Type": "application/json" },
-            //   body: JSON.stringify({
-            //     challengeId,
-            //     language,
-            //     code,
-            //     mode: "run",
-            //   }),
-            // });
-            //
-            // const result = await response.json();
-            //
-            // if (!response.ok) {
-            //   throw new Error(result.error || "Erro ao executar testes.");
-            // }
-            //
-            // setConsoleStatus(result.status ?? "Executado");
-            // setConsoleTone(result.success ? "success" : "error");
-            // setConsoleOutput(result.output ?? "Sem saída.");
-            // =========================================================
+            const response = await fetch("/api/submissions", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    challengeId,
+                    language,
+                    source_code: code,
+                    mode: "run"
+                })
+            })
 
-            await new Promise((resolve) => setTimeout(resolve, 700));
+            const result = await response.json()
 
-            setConsoleStatus("Simulação");
-            setConsoleTone("default");
-            setConsoleOutput(
-                [
-                    "Aqui tu vai chamar /api/submissions.",
+            if (!response.ok) {
+                throw new Error(result.error || "Erro ao executar testes.")
+            }
+
+            setConsoleStatus(result.passed ? "Passou" : "Não passou")
+            setConsoleTone(result.success ? "success" : "error")
+            if (result.success) {
+                setConsoleOutput([
+                    "= = = = = Sucesso! = = = = =",
+                    `${result.passedTests}/${result.totalTests}`,
+                    "= = = = = = = = = = = = = = "
+                ].join("\n"))
+            } else {
+                let firstLine = `= = = = = Caso Teste ${result.failedAt} = = = = =`
+                setConsoleOutput([
+                    firstLine,
+                    `${result.passedTests}/${result.totalTests}`,
                     "",
-                    `challengeId: ${challengeId}`,
-                    `language: ${language}`,
-                    "",
-                    "No backend tu pode:",
-                    "1. buscar challenge e hidden tests com Prisma",
-                    "2. chamar o runner",
-                    "3. retornar stdout, stderr, status, memória e tempo",
-                ].join("\n")
-            );
+                    `Saída Esperada: ${result.expectedOutput}`,
+                    `Saída Atual: ${result.actualOutput}`,
+                    `${"= ".repeat((firstLine.length / 2))}`
+                ].join("\n"))
+            } 
         } catch (error) {
             const message =
                 error instanceof Error ? error.message : "Erro ao executar testes.";
@@ -136,48 +131,42 @@ export default function ChallengeEditorClient({
             setConsoleStatus("Enviando");
             setConsoleOutput("Enviando submissão...");
 
-            // =========================================================
-            // AQUI TU CHAMA TUA API DO APP ROUTER
-            // ---------------------------------------------------------
-            // Exemplo:
-            // const response = await fetch("/api/submissions", {
-            //   method: "POST",
-            //   headers: { "Content-Type": "application/json" },
-            //   body: JSON.stringify({
-            //     challengeId,
-            //     language,
-            //     code,
-            //     mode: "submit",
-            //   }),
-            // });
-            //
-            // const result = await response.json();
-            //
-            // if (!response.ok) {
-            //   throw new Error(result.error || "Erro ao enviar submissão.");
-            // }
-            //
-            // setConsoleStatus(result.status ?? "Submissão enviada");
-            // setConsoleTone(result.success ? "success" : "error");
-            // setConsoleOutput(result.output ?? "Sem saída.");
-            // =========================================================
+            const response = await fetch("/api/submissions", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    challengeId,
+                    language,
+                    source_code: code,
+                    mode: "submit"
+                })
+            })
 
-            await new Promise((resolve) => setTimeout(resolve, 700));
+            const result = await response.json()
 
-            setConsoleStatus("Submissão enviada");
-            setConsoleTone("success");
-            setConsoleOutput(
-                [
-                    "Submissão enviada com sucesso.",
+            if (!response.ok) {
+                throw new Error(result.error || "Erro ao executar testes.")
+            }
+
+            setConsoleStatus(result.passed ? "Passou" : "Não passou")
+            setConsoleTone(result.success ? "success" : "error")
+            if (result.success) {
+                setConsoleOutput([
+                    "= = = = = Sucesso! = = = = =",
+                    `${result.passedTests}/${result.totalTests}`,
+                    "= = = = = = = = = = = = = = "
+                ].join("\n"))
+            } else {
+                let firstLine = `= = = = = Caso Teste ${result.failedAt} = = = = =`
+                setConsoleOutput([
+                    firstLine,
+                    `${result.passedTests}/${result.totalTests}`,
                     "",
-                    "Fluxo esperado:",
-                    "1. route handler recebe challengeId/language/code",
-                    "2. busca hidden tests com Prisma",
-                    "3. chama o runner",
-                    "4. salva a submissão no Prisma",
-                    "5. retorna o resultado final",
-                ].join("\n")
-            );
+                    `Saída Esperada: ${result.expectedOutput}`,
+                    `Saída Atual: ${result.actualOutput}`,
+                    `${"= ".repeat((firstLine.length / 2))}`
+                ].join("\n"))
+            }
         } catch (error) {
             const message =
                 error instanceof Error ? error.message : "Erro ao enviar submissão.";
@@ -210,9 +199,9 @@ export default function ChallengeEditorClient({
                             }
                             className="min-w-42.5 rounded-2xl border border-white/10 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-zinc-200 outline-none transition focus:border-emerald-400"
                         >
-                            <option value="javascript">JavaScript</option>
-                            <option value="python">Python</option>
-                            <option value="java">Java</option>
+                            {LANGUAGES.map(x => (
+                                <option key={x} value={x}>{x}</option>
+                            ))}
                         </select>
 
                         <button
@@ -251,7 +240,7 @@ export default function ChallengeEditorClient({
 
                     <MonacoEditor
                         height="520px"
-                        language={language}
+                        language={language.toLowerCase()}
                         value={code}
                         onChange={(value) => setCode(value ?? "")}
                         theme="vs-dark"
