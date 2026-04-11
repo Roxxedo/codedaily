@@ -3,22 +3,20 @@ import { NextResponse } from "next/server";
 
 export async function GET(
     _: Request,
-    { params }: { params: { slug: string } }
+    { params }: { params: Promise<{ slug: string }> }
 ) {
+    const { slug } = await params;
+
     const challenge = await prisma.challenge.findUnique({
         where: {
-            slug: params.slug,
+            slug,
             isPublished: true,
-        },
-        include: {
-            tags: true,
-            languages: true,
         },
     });
 
     if (!challenge) {
-        return NextResponse.json({ error: "Not found" }, { status: 404 })
+        return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    return NextResponse.json(challenge)
+    return NextResponse.json(challenge);
 }

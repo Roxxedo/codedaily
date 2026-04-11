@@ -8,11 +8,7 @@ export async function GET() {
         },
         orderBy: {
             createdAt: "desc",
-        },
-        include: {
-            tags: true,
-            languages: true,
-        },
+        }
     });
 
     return NextResponse.json(challenges);
