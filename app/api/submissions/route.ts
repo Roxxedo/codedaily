@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     for (let i = 0; i < testCases.length; i++) {
         const testCase = testCases[i];
 
-        const runnerResponse = await fetch(`${process.env.RUNNER_URL}/executions/run`, {
+        const runnerResponse = await fetch(`${process.env.RUNNER_URL}/run`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
